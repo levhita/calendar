@@ -1,4 +1,4 @@
-class calendarModel {
+class scheduleModel {
   load() {
     this.events = [
       {
