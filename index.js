@@ -6,7 +6,7 @@ $(document).ready(function() {
     header: {
       left: "prev,next today",
       center: "title",
-      right: "month,basicWeek,basicDay"
+      right: "month,agendaWeek,basicDay"
     },
     //defaultDate: "2018-03-12",
     navLinks: true, // can click day/week names to navigate views
