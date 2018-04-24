@@ -6,8 +6,10 @@ var app = new Vue({
 		tasksData:[],
 		scheduledTasks:[],
 		resources:[],
-		projectAvailability:'',
-		startDate:''
+		projectAvailabilityString: "every weekday after 8:30am and before 5:00pm",
+		projectAvailabilityString2: "every weekday after 8:30am and before 5:00pm",
+		projectAvailability: [],
+		startDate: new Date()
 	},
 	methods: {
 		render: function(){
@@ -55,17 +57,25 @@ var app = new Vue({
 			];
 
 			this.resources = [
-			{id: 'class', available: later.parse.text('after 8:30am and before 2:00pm')},
-			{id: 'extra', available: later.parse.text('after 3:00pm and before 5:00pm')}
+			{id: 'class'},// available: later.parse.text('after 8:30am and before 2:00pm')},
+			{id: 'extra'},// available: later.parse.text('after 3:00pm and before 5:00pm')}
 			];
-
-			this.projectAvailability = later.parse.text('every weekday after 8:30am and before 5:00pm'),
-			this.startDate = new Date();
-
 		},
 		
+		refresh:function() {
+			this.schedule();
+			this.render();
+		},
+
 		schedule: function(){
+			console.log('scheduling');
 			this.startDate = new Date(this.startDate);
+			
+			this.projectAvailability =	later.parse.recur().onWeekday().after("8:30").time().before("11:00").time();
+			this.projectAvailability.and().onWeekday().after("11:30").time().before("14:00").time();
+			this.projectAvailability.and().onWeekday().after("15:00").time().before("17:00").time();
+			this.projectAvailability.except().every(5).dayOfWeek().after("14:00").time();
+			
 			this.scheduledTasks = schedule.create(this.tasks, this.resources, this.projectAvailability, this.startDate).scheduledTasks;
 
 			this.events = [];
@@ -95,5 +105,4 @@ var app = new Vue({
 });
 
 app.load();
-//app.schedule();
-//app.render();
+app.refresh();
