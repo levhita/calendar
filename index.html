@@ -20,13 +20,14 @@
       <div id="tasks" class="col-md-4">
         <h2>Tasks</h2>
         <div>
+          <input v-model="startDate"/>
           <div v-for="task in tasks" v-bind:key="task.id">
-            Name: {{tasksData[task.id]}}
-            Duration: {{task.duration}}
-            Depends: {{task.dependsOn}}
-            Resources: {{task.resources}}
-            Minimal Scheduling: {{task.minSchedule}}
-            Priority: {{task.priority}}
+            Name: {{tasksData[task.id]}}<br>
+            Duration: {{task.duration}}<br>
+            Depends: {{task.dependsOn}}<br>
+            Resources: {{task.resources}}<br>
+            Minimal Scheduling: {{task.minSchedule}}<br>
+            Priority: {{task.priority}}<br>
             <hr>
           </div>
         </div>

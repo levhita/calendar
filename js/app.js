@@ -6,10 +6,12 @@ var app = new Vue({
 		tasksData:[],
 		scheduledTasks:[],
 		resources:[],
+		projectAvailability:'',
+		startDate:''
 	},
 	methods: {
-		mounted: function() {
-			this.load();
+		render: function(){
+			$("#calendar").fullCalendar('destroy');
 			
 			$("#calendar").fullCalendar({
 				header: {
@@ -23,31 +25,10 @@ var app = new Vue({
 			    eventLimit: false, /* allow "more" link when too many events */
 			    events: this.getEvents()
 			});
-		
 		},
+
 		load: function() {
 			this.loadMockup();
-			console.log(this.scheduledTasks);
-			
-			this.events = [];
-			for(let id in this.scheduledTasks) {
-				let task = this.scheduledTasks[id];
-
-
-				for(let i=0;i<task.schedule.length;i++){
-					let start = new Date(task.schedule[i].start);
-					let end = new Date(task.schedule[i].end);
-
-					let event = {
-						id: id,
-						title: this.tasksData[id],
-						start: start.toISOString(),
-						end: end.toISOString(),
-					}
-					console.log(event);
-					this.events.push(event);
-				}
-			}
 		},
 
 		loadMockup: function() {
@@ -81,13 +62,38 @@ var app = new Vue({
 			this.projectAvailability = later.parse.text('every weekday after 8:30am and before 5:00pm'),
 			this.startDate = new Date();
 
+		},
+		
+		schedule: function(){
+			this.startDate = new Date(this.startDate);
 			this.scheduledTasks = schedule.create(this.tasks, this.resources, this.projectAvailability, this.startDate).scheduledTasks;
 
+			this.events = [];
+			for(let id in this.scheduledTasks) {
+				let task = this.scheduledTasks[id];
+
+
+				for(let i=0;i<task.schedule.length;i++){
+					let start = new Date(task.schedule[i].start);
+					let end = new Date(task.schedule[i].end);
+
+					let event = {
+						id: id,
+						title: this.tasksData[id],
+						start: start.toISOString(),
+						end: end.toISOString(),
+					}
+					this.events.push(event);
+				}
+			}
 		},
+		
 		getEvents: function() {
 			return this.events;
 		}
 	}
 });
 
-app.mounted();
+app.load();
+//app.schedule();
+//app.render();
