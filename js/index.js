@@ -1,10 +1,6 @@
 $(document).ready(function() {
-
-  global app;
-  app.load().then(function(){
-    alert('sfsdf');
-  });
-  console.log(app.getEvents());
+  //let Schedule= new scheduleModel();
+  //Schedule.load();
 
   $("#calendar").fullCalendar({
     header: {
@@ -12,11 +8,12 @@ $(document).ready(function() {
       center: "title",
       right: "month,agendaWeek,basicDay"
     },
+    //defaultDate: "2018-03-12",
     defaultView: "agendaWeek",
     navLinks: true, // can click day/week names to navigate views
     editable: true,
     eventLimit: false, // allow "more" link when too many events
-    events: app.getEvents()
+    //events: Schedule.getEvents()
   });
-
 });
+

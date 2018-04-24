@@ -41,8 +41,8 @@ class scheduleModel {
 
     this.tasks = [
     {id: 1, duration: 4*60, resources: ['class']},
-    {id: 2, duration: 1*60, available: later.parse.text('on monday after 8:00am and before 10:00am') ,resources: ['class']},
-    {id: 3, duration: 2*60, dependsOn: [1], priority: 100, minSchedule: 120, resources: ['class']},
+    {id: 2, duration: 1*60, priority: 100, available: later.parse.recur().after('08:30:00').time().before('09:30:00').time() ,resources: ['class']},
+    {id: 3, duration: 2*60, dependsOn: [1], priority: 10, minSchedule: 120, resources: ['class']},
     {id: 4, duration: 8*60, dependsOn: [1], minSchedule: 120 ,resources: ['class']},
     {id: 5, duration: 5*60, dependsOn: [1,3] ,resources: ['class']},
     {id: 6, duration: 3*60, dependsOn: [4], resources: ['class'] },
@@ -51,15 +51,14 @@ class scheduleModel {
     ];
 
     this.resources = [
-    {id: 'A'},
-    {id: 'class', available: later.parse.text('after 9:00am and before 2:30pm')},
-    {id: 'C', isNotReservable: true}
+      {id: 'class', available: later.parse.text('after 8:30am and before 2:00pm')},
+      {id: 'extra', available: later.parse.text('after 3:00pm and before 5:00pm')}
     ];
 
-    this.projectAvailability = later.parse.text('every weekday after 9:00am and before 2:00pm'),
+    this.projectAvailability = later.parse.text('every weekday after 8:30am and before 5:00pm'),
     this.startDate = new Date();
     
-    schedule.date.localTime();
+    //schedule.date.localTime();
     this.scheduledTasks = schedule.create(this.tasks, this.resources, this.projectAvailability, this.startDate).scheduledTasks;
 
   }
