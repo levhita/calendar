@@ -6,27 +6,30 @@ var app = new Vue({
 		tasksData:[],
 		scheduledTasks:[],
 		resources:[],
-		projectAvailabilityString: "every weekday after 8:30am and before 5:00pm",
-		projectAvailabilityString2: "every weekday after 8:30am and before 5:00pm",
+		ranges:[],
 		projectAvailability: [],
-		startDate: new Date()
+		startDate: new Date(),
+		googleCalendarApiKey: 'AIzaSyDXWp_7j99BTGU-ey4PDNjhfIv7rFX-wBs',
+        eventsGoogleCalendar: 'laboratoria.la_vgvublo69ulgdo7qlreoje4lr0@group.calendar.google.com',
 	},
 	methods: {
 		render: function(){
 			$("#calendar").fullCalendar('destroy');
-			
+			console.log(this.eventsGoogleCalendar);
 			$("#calendar").fullCalendar({
 				header: {
 					left: "prev,next today",
 					center: "title",
-					right: "month,agendaWeek,basicDay"
+					right: "month,agendaWeek,agendaDay"
 				},
 				defaultView: "agendaWeek",
 			    navLinks: true, /* can click day/week names to navigate views */
 			    editable: true,
-			    eventLimit: false, /* allow "more" link when too many events */
-			    events: this.getEvents()
+			    googleCalendarApiKey: this.googleCalendarApiKey,
+        		events: this.eventsGoogleCalendar
+
 			});
+			//events: this.getEvents()
 		},
 
 		load: function() {
@@ -60,6 +63,12 @@ var app = new Vue({
 			{id: 'class'},// available: later.parse.text('after 8:30am and before 2:00pm')},
 			{id: 'extra'},// available: later.parse.text('after 3:00pm and before 5:00pm')}
 			];
+			
+			this.ranges = [
+				{id:1, after:'8:30', before:'11:00'},
+				{id:2, after:'11:30', before:'14:00'},
+				{id:3, after:'15:00', before:'17:00'}
+			];
 		},
 		
 		refresh:function() {
@@ -68,13 +77,16 @@ var app = new Vue({
 		},
 
 		schedule: function(){
-			console.log('scheduling');
+
 			this.startDate = new Date(this.startDate);
 			
-			this.projectAvailability =	later.parse.recur().onWeekday().after("8:30").time().before("11:00").time();
-			this.projectAvailability.and().onWeekday().after("11:30").time().before("14:00").time();
-			this.projectAvailability.and().onWeekday().after("15:00").time().before("17:00").time();
-			this.projectAvailability.except().every(5).dayOfWeek().after("14:00").time();
+			this.projectAvailability =	later.parse.recur();
+			for (let i=0;i<this.ranges.length;i++) {
+				this.projectAvailability.and().onWeekday()
+				.after(this.ranges[i].after).time()
+				.before(this.ranges[i].before).time();
+			}
+			//this.projectAvailability.except().every(5).dayOfWeek().after("14:00").time();// Chilango's Friday
 			
 			this.scheduledTasks = schedule.create(this.tasks, this.resources, this.projectAvailability, this.startDate).scheduledTasks;
 
