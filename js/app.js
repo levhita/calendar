@@ -76,6 +76,21 @@ var app = new Vue({
 			this.render();
 		},
 
+		addRange: function() {
+			let top = 0;
+			for (i=0;i<this.ranges.length;i++) {
+				if(this.ranges[i].id>top) {
+					top=this.ranges[i].id;
+				}
+			}
+			this.ranges.push({id:++top, after:'15:00', before:'17:00'});
+		},
+
+		deleteRange: function(id) {
+			let index = this.ranges.findIndex(range => range.id===id );
+			this.ranges.splice(index,1);
+		},
+
 		schedule: function(){
 
 		
