@@ -15,7 +15,6 @@ var app = new Vue({
 	methods: {
 		render: function(){
 			$("#calendar").fullCalendar('destroy');
-			console.log(this.eventsGoogleCalendar);
 			$("#calendar").fullCalendar({
 				header: {
 					left: "prev,next today",
@@ -26,13 +25,14 @@ var app = new Vue({
 			    navLinks: true, /* can click day/week names to navigate views */
 			    editable: true,
 			    googleCalendarApiKey: this.googleCalendarApiKey,
-        		events: this.eventsGoogleCalendar
+        		eventSources: [ this.eventsGoogleCalendar, this.getEvents() ]
 
 			});
-			//events: this.getEvents()
+			this.calendar = $('#calendar').fullCalendar('getCalendar'); 
 		},
 
 		load: function() {
+			this.render();
 			this.loadMockup();
 		},
 
@@ -78,6 +78,7 @@ var app = new Vue({
 
 		schedule: function(){
 
+		
 			this.startDate = new Date(this.startDate);
 			
 			this.projectAvailability =	later.parse.recur();
@@ -86,7 +87,27 @@ var app = new Vue({
 				.after(this.ranges[i].after).time()
 				.before(this.ranges[i].before).time();
 			}
-			//this.projectAvailability.except().every(5).dayOfWeek().after("14:00").time();// Chilango's Friday
+			
+
+			this.projectAvailability = this.projectAvailability.except();
+			let clientEvents = this.calendar.clientEvents();
+			for (let i=0;i<clientEvents.length;i++) {
+				let event = clientEvents[i];
+				if (typeof event.source.googleCalendarId !=='undefined') {
+					let start = event.start;
+					let end = event.end;
+					
+					this.projectAvailability
+					.and()
+						.on(start.dayOfYear()).dayOfYear()
+						.after(start.format('HH:mm')).time()
+						.before(end.format('HH:mm')).time();
+					
+					app.test = event.start;
+				
+				}
+				
+			}
 			
 			this.scheduledTasks = schedule.create(this.tasks, this.resources, this.projectAvailability, this.startDate).scheduledTasks;
 
@@ -115,6 +136,5 @@ var app = new Vue({
 		}
 	}
 });
-
 app.load();
-app.refresh();
+/*app.refresh();*/
