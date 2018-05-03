@@ -12,58 +12,32 @@
 
 </head>
 <body>
-  <div class="container-fluid">
+  <header class="container-fluid">
     <h1>Calendar Scheduler</h1>
-  </div>
+  </header>
 
-  <div class="container-fluid" id="tasks">
+  <main class="container-fluid" id="tasks">
     <div class="row">
-      <div  class="col-lg-3 col-md-4">
+      <section class="col-lg-3 col-md-4">
         <h2>Tasks</h2>
-        
-        <div class="form"><!--General Settings-->
-          <div class="form-group">
-            <label for="keyInput">API-Key:</label>
-            <input id="keyInput" class="form-control" v-model="googleCalendarApiKey"/>
-          </div>
-          <div class="form-group">
-            <label for="calendarInput">Calendar:</label>
-            <input id="calendarInput" class="form-control" v-model="eventsGoogleCalendar"/>
-          </div>
-          <div class="form-group">
-            <label for="startDateInput">Start Date:</label>
-            <input id="startDateInput" class="form-control" v-model="startDate"/>
-          </div>
-          <button class="btn btn-primary" v-on:click="addRange">Add Range</button>
-          <div v-for="range in ranges" v-bind:key="range.id">
-            <div class="form-row">
-              <div class="col">
-                <input class="form-control" v-model="range.after"/>
-              </div> — 
-              <div class="col">
-                <input class="form-control" v-model="range.before"/>
-              </div>
-              <button class="btn btn-primary" v-on:click="deleteRange(range.id)">-</button>
-            </div><br>
-          </div>
-
-          <br>
-          <button class="btn btn-primary" v-on:click="refresh">Schedule</button>
-        </div><!--End General Settings-->
-        
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#editSettingsModal">Settings</button> <button class="btn btn-primary" v-on:click="refresh">Schedule</button> 
         <hr>
         
         <div class="card" v-for="task in tasks">
           <div class="card-body">
-            <h5 class="card-title">{{tasksData[task.id]}}</h5>
-            <dl>
-              <dt>Duration:</dt> <dd>{{task.duration}} minutes</dd>
-              <dt>MinSchedule:</dt> <dd>{{task.minSchedule}} minutes</dd>
-              <dt>Priority:</dt> <dd>{{task.priority}}</dd>
-              <dt>Depends:</dt> <dd>{{task.dependsOn}}</dd>
-            </dl>
-            <div class="text-right">
-              <button class="btn btn-primary" href="#" v-on:click="edit(task.id)">Edit</button>
+            <button style="float:right" class="btn btn-light" data-toggle="collapse" v-bind:data-target="'#taskCollapse'+task.id"><img src="svg/chevron-bottom.svg" alt="Show"></button>
+            <h5 class="card-title">{{tasksData[task.id]}} ({{task.duration}} mins)</h5>
+            
+
+            <div class="collapse" :id="'taskCollapse'+task.id">
+              <dl>
+                <dt>MinSchedule:</dt> <dd>{{task.minSchedule}} minutes</dd>
+                <dt>Priority:</dt> <dd>{{task.priority}}</dd>
+                <dt>Depends On:</dt> <dd>{{task.dependsOn}}</dd>
+              </dl>
+              <div class="text-right">
+                <button class="btn btn-primary" href="#" v-on:click="edit(task.id)">Edit</button>
+              </div>
             </div>
           </div>
 
@@ -71,9 +45,9 @@
 
         <hr>
 
-        <div class="modal" v-if="selectedTask" id="editTaskModal" tabindex="-1" role="dialog"><!-- Modal-->
+        <div class="modal"  id="editTaskModal" tabindex="-1" role="dialog"><!-- Modal-->
           <div class="modal-dialog" role="document">
-            <div class="modal-content">
+            <div v-if="selectedTask" class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title">{{selectedTask.name}}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -106,10 +80,56 @@
           </div>
         </div><!-- End Modal-->
 
-      </div>
-      <div id="calendar" class="col-lg-9 col-md-8"></div>
+        <div class="modal"  id="editSettingsModal" tabindex="-1" role="dialog"><!-- Modal-->
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Settings</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body" >
+                <div class="form"><!--General Settings-->
+
+                  <button class="btn btn-primary" v-on:click="addRange">Add Range</button>
+                  <div v-for="range in ranges" v-bind:key="range.id">
+                    <div class="form-row">
+                      <div class="col">
+                        <input class="form-control" v-model="range.after"/>
+                      </div> — 
+                      <div class="col">
+                        <input class="form-control" v-model="range.before"/>
+                      </div>
+                      <button class="btn btn-primary" v-on:click="deleteRange(range.id)">-</button>
+                    </div>
+                  </div>   
+                  <div class="form-group">
+                    <label for="keyInput">API-Key:</label>
+                    <input id="keyInput" class="form-control" v-model="googleCalendarApiKey"/>
+                  </div>
+                  <div class="form-group">
+                    <label for="calendarInput">Calendar:</label>
+                    <input id="calendarInput" class="form-control" v-model="eventsGoogleCalendar"/>
+                  </div>
+                  <div class="form-group">
+                    <label for="startDateInput">Start Date:</label>
+                    <input id="startDateInput" class="form-control" v-model="startDate"/>
+                  </div>
+
+                </div><!--End General Settings-->
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Modal-->
+       </section>
+
+      <section id="calendar" class="col-lg-9 col-md-8"></section>
     </div>
-  </div>
+  </main>
 
   <!-- Bootstrap Basics -->
   <script src="js/jquery-3.3.1.min.js"></script>
