@@ -7,6 +7,7 @@ var app = new Vue({
 		scheduledTasks:[],
 		resources:[],
 		ranges:[],
+		selectedTask : null,
 		projectAvailability: [],
 		startDate: new Date(),
 		googleCalendarApiKey: 'AIzaSyDXWp_7j99BTGU-ey4PDNjhfIv7rFX-wBs',
@@ -14,6 +15,7 @@ var app = new Vue({
 	},
 	methods: {
 		render: function(){
+			//Replace with test of emptyness and only refresh
 			$("#calendar").fullCalendar('destroy');
 			$("#calendar").fullCalendar({
 				header: {
@@ -49,19 +51,19 @@ var app = new Vue({
 			}
 
 			this.tasks = [
-			{id: 1, duration: 4*60, resources: ['class']},
-			{id: 2, duration: 1*60, priority: 100, available: later.parse.recur().after('08:30:00').time().before('09:30:00').time() ,resources: ['class']},
-			{id: 3, duration: 2*60, dependsOn: [1], priority: 10, minSchedule: 120, resources: ['class']},
-			{id: 4, duration: 8*60, dependsOn: [1], minSchedule: 120 ,resources: ['class']},
-			{id: 5, duration: 5*60, dependsOn: [1,3] ,resources: ['class']},
-			{id: 6, duration: 3*60, dependsOn: [4], resources: ['class'] },
-			{id: 7, duration: 3*60, dependsOn: [5],  resources: ['class'] },
-			{id: 8, duration: 3*60, dependsOn: [6,7], resources: ['class'] }
+				{id: 1, duration: 4*60, resources: ['class']},
+				{id: 2, duration: 1*60, priority: 100, available: later.parse.recur().after('08:30:00').time().before('09:30:00').time() ,resources: ['class']},
+				{id: 3, duration: 2*60, dependsOn: [1], priority: 10, minSchedule: 120, resources: ['class']},
+				{id: 4, duration: 8*60, dependsOn: [1], minSchedule: 120 ,resources: ['class']},
+				{id: 5, duration: 5*60, dependsOn: [1,3] ,resources: ['class']},
+				{id: 6, duration: 3*60, dependsOn: [4], resources: ['class'] },
+				{id: 7, duration: 3*60, dependsOn: [5],  resources: ['class'] },
+				{id: 8, duration: 3*60, dependsOn: [6,7], resources: ['class'] }
 			];
 
 			this.resources = [
-			{id: 'class'},// available: later.parse.text('after 8:30am and before 2:00pm')},
-			{id: 'extra'},// available: later.parse.text('after 3:00pm and before 5:00pm')}
+				{id: 'class'},// available: later.parse.text('after 8:30am and before 2:00pm')},
+				{id: 'extra'},// available: later.parse.text('after 3:00pm and before 5:00pm')}
 			];
 			
 			this.ranges = [
@@ -91,9 +93,14 @@ var app = new Vue({
 			this.ranges.splice(index,1);
 		},
 
-		schedule: function(){
+		edit: function(id) {
+			let index = this.tasks.findIndex(task => task.id===id );
+			let name = (' ' + this.tasksData[id]).slice(1);
+			this.selectedTask = Object.assign({name:name}, this.tasks[index]); 
+			$('#editTaskModal').modal("show");
+		},
 
-		
+		schedule: function(){
 			this.startDate = new Date(this.startDate);
 			
 			this.projectAvailability =	later.parse.recur();
@@ -103,7 +110,6 @@ var app = new Vue({
 				.before(this.ranges[i].before).time();
 			}
 			
-
 			this.projectAvailability = this.projectAvailability.except();
 			let clientEvents = this.calendar.clientEvents();
 			for (let i=0;i<clientEvents.length;i++) {
@@ -117,11 +123,7 @@ var app = new Vue({
 						.on(start.dayOfYear()).dayOfYear()
 						.after(start.format('HH:mm')).time()
 						.before(end.format('HH:mm')).time();
-					
-					app.test = event.start;
-				
 				}
-				
 			}
 			
 			this.scheduledTasks = schedule.create(this.tasks, this.resources, this.projectAvailability, this.startDate).scheduledTasks;
@@ -129,7 +131,6 @@ var app = new Vue({
 			this.events = [];
 			for(let id in this.scheduledTasks) {
 				let task = this.scheduledTasks[id];
-
 
 				for(let i=0;i<task.schedule.length;i++){
 					let start = new Date(task.schedule[i].start);
@@ -152,4 +153,3 @@ var app = new Vue({
 	}
 });
 app.load();
-/*app.refresh();*/

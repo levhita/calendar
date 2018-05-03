@@ -16,11 +16,12 @@
     <h1>Calendar Scheduler</h1>
   </div>
 
-  <div class="container-fluid">
+  <div class="container-fluid" id="tasks">
     <div class="row">
-      <div id="tasks" class="col-lg-3 col-md-4">
+      <div  class="col-lg-3 col-md-4">
         <h2>Tasks</h2>
-        <div class="form">
+        
+        <div class="form"><!--General Settings-->
           <div class="form-group">
             <label for="keyInput">API-Key:</label>
             <input id="keyInput" class="form-control" v-model="googleCalendarApiKey"/>
@@ -48,33 +49,65 @@
 
           <br>
           <button class="btn btn-primary" v-on:click="refresh">Schedule</button>
-        </div>
+        </div><!--End General Settings-->
+        
         <hr>
-        <div class="form" v-for="task in tasks" v-bind:key="task.id">
-          <div class="form-group">
-            <label for="nameInput">Name:</label>
-            <input id="nameInput" class="form-control" v-model="tasksData[task.id]"/>
+        
+        <div class="card" v-for="task in tasks">
+          <div class="card-body">
+            <h5 class="card-title">{{tasksData[task.id]}}</h5>
+            <dl>
+              <dt>Duration:</dt> <dd>{{task.duration}} minutes</dd>
+              <dt>MinSchedule:</dt> <dd>{{task.minSchedule}} minutes</dd>
+              <dt>Priority:</dt> <dd>{{task.priority}}</dd>
+              <dt>Depends:</dt> <dd>{{task.dependsOn}}</dd>
+            </dl>
+            <div class="text-right">
+              <button class="btn btn-primary" href="#" v-on:click="edit(task.id)">Edit</button>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="durationInput">Duration:</label>
-            <input id="durationInput" class="form-control" v-model="task.duration"/>
-          </div>
-          <div class="form-group">
-            <label for="minScheduleInput">Minimal Duration:</label>
-            <input id="minScheduleInput" class="form-control" v-model="task.minSchedule"/>
-          </div>
-          <div class="form-group">
-            <label for="priorityInput">Priority:</label>
-            <input id="priorityInput" class="form-control" v-model="task.priority"/>
-          </div>
-          Depends: {{task.dependsOn}}<br>
-          Resources: {{task.resources}}<br>
-          <hr>
+
         </div>
+
+        <hr>
+
+        <div class="modal" v-if="selectedTask" id="editTaskModal" tabindex="-1" role="dialog"><!-- Modal-->
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">{{selectedTask.name}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body" >
+                <div class="form-group">
+                  <label for="nameInput">Name:</label>
+                  <input id="nameInput" class="form-control" v-model="selectedTask.name"/>
+                </div>
+                <div class="form-group">
+                  <label for="durationInput">Duration:</label>
+                  <input id="durationInput" class="form-control" v-model="selectedTask.duration"/>
+                </div>
+                <div class="form-group">
+                  <label for="minScheduleInput">Minimal Duration:</label>
+                  <input id="minScheduleInput" class="form-control" v-model="selectedTask.minSchedule"/>
+                </div>
+                <div class="form-group">
+                  <label for="priorityInput">Priority:</label>
+                  <input id="priorityInput" class="form-control" v-model="selectedTask.priority"/>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Modal-->
+
       </div>
-
       <div id="calendar" class="col-lg-9 col-md-8"></div>
-
     </div>
   </div>
 
