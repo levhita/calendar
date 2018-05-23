@@ -1,18 +1,23 @@
-window.createCalendar = function() {
-	var calendar = new Vue({
+(function(){
+	var app = new Vue({
 		el: '#tasks',
 		data: {
+			key:'', //done
+			name:'', //done
+			description:'', //done
 			events:[],
-			tasks:[],
-			tasksData:[],
+			tasks:[], //done
+			tasksData:[], //done
 			scheduledTasks:[],
-			resources:[],
+			scheduleRef: null, //done
+			resources:[{id: 'class'}], 
 			ranges:[],
 			selectedTask : null,
 			projectAvailability: [],
-			startDate: new Date(),
-			googleCalendarApiKey: 'AIzaSyDXWp_7j99BTGU-ey4PDNjhfIv7rFX-wBs',
-			eventsGoogleCalendar: 'laboratoria.la_vgvublo69ulgdo7qlreoje4lr0@group.calendar.google.com',
+			startDate: "",
+			googleCalendarApiKey: "",
+			eventsGoogleCalendar: "",
+			
 		},
 		methods: {
 			render: function(){
@@ -31,14 +36,56 @@ window.createCalendar = function() {
 					eventSources: [ this.eventsGoogleCalendar, this.getEvents() ]
 					
 				});
-				this.calendar = $('#calendar').fullCalendar('getCalendar'); 
+				app.calendar = $('#calendar').fullCalendar('getCalendar'); 
 			},
 			
 			load: function() {
-				this.render();
-				this.loadMockup();
+				if (window.location.hash=="") {
+					alert("Couldn't load Schedule, redirecting to home...");
+					window.location = "index.html";
+				}
+				app.key = window.location.hash.substr(1);
+				
+				app.scheduleRef = firebase.database().ref().child("schedules/"+app.key);
+				
+				app.scheduleRef.once("value", (snap) => {
+					if (snap.val()==null) {
+						alert("Couldn't load Schedule,redirecting to home...");
+						window.location = "index.html";
+					}
+				}, function (error) {
+					alert("Couldn't load Schedule, redirecting to home...");
+					window.location = "index.html";
+				});
+				
+				app.scheduleRef.on("value", (snap) => app.updateSettings(snap.val()));
+				app.scheduleRef.child('tasks').on("value", (snap) => app.updateTasks(snap.val()));
+				
+				/*this.render();*/
 			},
-			
+			updateSettings: function(schedule) {
+				app.name		= schedule.name || "";
+				app.description = schedule.description || "";
+				app.googleCalendarApiKey = schedule.googleCalendarApiKey || "";
+				app.eventsGoogleCalendar = schedule.eventsGoogleCalendar || "";
+				
+				app.ranges = schedule.ranges || [];				
+				app.startDate = (schedule.startDate)? new Date(schedule.startDate): new Date();
+			},
+			updateTasks: function(tasks) {
+				app.tasksData = {};
+				
+				Object.keys(tasks).forEach( function(key, index) {
+					let task = tasks[key];
+					task.id = app.tasksData.length;
+					if (task.id>0) {
+						task.dependsOn=[task.id-1];
+					}
+					task.resources=['class'];
+					app.tasksData[task.id]=task.name;
+				});	
+				app.tasks = tasks;
+			},
 			loadMockup: function() {
 				this.tasksData= {
 					1: 'Presentation',
@@ -62,10 +109,7 @@ window.createCalendar = function() {
 					{id: 8, duration: 3*60, dependsOn: [6,7], resources: ['class'] }
 				];
 				
-				this.resources = [
-					{id: 'class'},// available: later.parse.text('after 8:30am and before 2:00pm')},
-					{id: 'extra'},// available: later.parse.text('after 3:00pm and before 5:00pm')}
-				];
+				this.resources = [{id: 'class'}];
 				
 				this.ranges = [
 					{id:1, after:'8:30', before:'11:00'},
@@ -153,5 +197,7 @@ window.createCalendar = function() {
 			}
 		}
 	});
-	return calendar;
-};
+	
+	app.load();
+	
+})();

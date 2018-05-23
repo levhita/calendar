@@ -24,16 +24,13 @@
 					description: $("#descriptionTextarea").val(),
 					googleCalendarApiKey: $("#keyInput").val(),
 					eventsGoogleCalendar: $("#calendarInput").val(),
+					new: true
 				}
 				
-				app.schedulesRef.push().set(newSchedule);
+				let newScheduleRef = app.schedulesRef.push();
+				newScheduleRef.set(newSchedule);
 				
-				$("nameInput").val("");
-				$("descriptionTextarea").val("");
-				$("keyInput").val("");
-				$("calendarInput").val("");
-				
-				$("#createModal").modal("hide");
+				window.location = "calendar.html#"+newScheduleRef.key;
 			},
 			edit:  function(key) {
 				window.location = "calendar.html#"+key;
