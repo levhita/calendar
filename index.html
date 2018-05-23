@@ -1,153 +1,103 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- Required meta tags -->
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Laboratoria Calendar Demo</title>
-
   <link rel="stylesheet" href="css/bootstrap.min.css">
-  <link rel='stylesheet' href="css/fullcalendar.min.css">
-
-</head>
+ </head>
 <body>
-  <header class="container-fluid">
-    <h1>Calendar Scheduler</h1>
+  
+  <header class="container">
+    <h1>Calendar Scheduler <small style="font-size: 0.5em">by <strong>levhita</strong></small></h1>
   </header>
-
-  <main class="container-fluid" id="tasks">
+  
+  <main class="container" id="app">
+    
     <div class="row">
-      <section class="col-lg-3 col-md-4">
-        <h2>Tasks</h2>
-        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#editSettingsModal">Settings</button> <button class="btn btn-primary" v-on:click="refresh">Schedule</button> 
+      <div class="col text-right">
+        <button class="btn btn-primary" v-on:click="showCreateModal">Create Schedule</button>
         <hr>
-        
-        <div class="card" v-for="task in tasks">
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-6 col-sm-12" style="margin-top:1em" v-for="schedule in schedules" v-bind:key="schedule.key">
+        <div class="card">
           <div class="card-body">
-            <button style="float:right" class="btn btn-light" data-toggle="collapse" v-bind:data-target="'#taskCollapse'+task.id"><img src="svg/chevron-bottom.svg" alt="Show"></button>
-            <h5 class="card-title">{{tasksData[task.id]}} ({{task.duration}} mins)</h5>
-            
+            <h4 class="card-title">{{schedule.name}}</h4>
+            <p class="card-text">
+              {{schedule.description}}
 
-            <div class="collapse" :id="'taskCollapse'+task.id">
               <dl>
-                <dt>MinSchedule:</dt> <dd>{{task.minSchedule}} minutes</dd>
-                <dt>Priority:</dt> <dd>{{task.priority}}</dd>
-                <dt>Depends On:</dt> <dd>{{task.dependsOn}}</dd>
+                <dt>API-Key:</dt>
+                <dd>{{schedule.googleCalendarApiKey}}</dd>
+                <dt>Calendar ID:</dt>
+                <dd>{{schedule.eventsGoogleCalendar}}</dd>
               </dl>
-              <div class="text-right">
-                <button class="btn btn-primary" href="#" v-on:click="edit(task.id)">Edit</button>
+            </p>
+          </div>
+          <div class="card-footer text-right">
+            <button class="btn btn-link" v-on:click="edit(schedule.key)"><i class="far fa-edit"></i> Edit</button>
+            <button class="btn btn-primary" v-on:click="view(schedule.key)"><i class="far fa-eye"></i> View</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal"  id="createModal" tabindex="-1" role="dialog"><!-- Modal-->
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <h5 class="modal-title">Create Schedule</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body" >
+            <div class="form">
+              <div class="form-group">
+                <label for="nameInput">Name:</label>
+                <input id="nameInput" placeholder="Schedule for sprint 2" class="form-control"/>
+              </div>
+              <div class="form-group">
+                  <label for="descriptionTextarea">Description:</label>
+                  <textarea  id="descriptionTextarea" placeholder="July 23 - July 30" class="form-control" rows="3"></textarea>
+                </div>
+              <div class="form-group">
+                <label for="keyInput">API-Key:</label>
+                <input id="keyInput" placeholder="You get this key from your Google Account" class="form-control"/>
+              </div>
+              <div class="form-group">
+                <label for="calendarInput">Calendar ID:</label>
+                <input id="calendarInput" placeholder="You get this one from your calendar settings" class="form-control"/>
               </div>
             </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" v-on:click="create">Create</button>
           </div>
 
         </div>
-
-        <hr>
-
-        <div class="modal"  id="editTaskModal" tabindex="-1" role="dialog"><!-- Modal-->
-          <div class="modal-dialog" role="document">
-            <div v-if="selectedTask" class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">{{selectedTask.name}}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body" >
-                <div class="form-group">
-                  <label for="nameInput">Name:</label>
-                  <input id="nameInput" class="form-control" v-model="selectedTask.name"/>
-                </div>
-                <div class="form-group">
-                  <label for="durationInput">Duration:</label>
-                  <input id="durationInput" class="form-control" v-model="selectedTask.duration"/>
-                </div>
-                <div class="form-group">
-                  <label for="minScheduleInput">Minimal Duration:</label>
-                  <input id="minScheduleInput" class="form-control" v-model="selectedTask.minSchedule"/>
-                </div>
-                <div class="form-group">
-                  <label for="priorityInput">Priority:</label>
-                  <input id="priorityInput" class="form-control" v-model="selectedTask.priority"/>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-              </div>
-            </div>
-          </div>
-        </div><!-- End Modal-->
-
-        <div class="modal"  id="editSettingsModal" tabindex="-1" role="dialog"><!-- Modal-->
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Settings</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body" >
-                <div class="form"><!--General Settings-->
-
-                  <button class="btn btn-primary" v-on:click="addRange">Add Range</button>
-                  <div v-for="range in ranges" v-bind:key="range.id">
-                    <div class="form-row">
-                      <div class="col">
-                        <input class="form-control" v-model="range.after"/>
-                      </div> — 
-                      <div class="col">
-                        <input class="form-control" v-model="range.before"/>
-                      </div>
-                      <button class="btn btn-primary" v-on:click="deleteRange(range.id)">-</button>
-                    </div>
-                  </div>   
-                  <div class="form-group">
-                    <label for="keyInput">API-Key:</label>
-                    <input id="keyInput" class="form-control" v-model="googleCalendarApiKey"/>
-                  </div>
-                  <div class="form-group">
-                    <label for="calendarInput">Calendar:</label>
-                    <input id="calendarInput" class="form-control" v-model="eventsGoogleCalendar"/>
-                  </div>
-                  <div class="form-group">
-                    <label for="startDateInput">Start Date:</label>
-                    <input id="startDateInput" class="form-control" v-model="startDate"/>
-                  </div>
-
-                </div><!--End General Settings-->
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              </div>
-            </div>
-          </div>
-        </div><!-- End Modal-->
-       </section>
-
-      <section id="calendar" class="col-lg-9 col-md-8"></section>
-    </div>
+      </div>
+    </div><!-- End Modal-->
+  
   </main>
-
-  <!-- Bootstrap Basics -->
-  <script src="js/jquery-3.3.1.min.js"></script>
-  <!--<script src="js/popper.min.js"></script>-->
-  <script src="js/bootstrap.min.js"></script>
-
-  <!--UI Library -->
-  <script src="js/vue.js"></script>
-
-  <!-- Key Libraries -->
-  <script src="js/moment.min.js"></script>
-  <script src="js/fullcalendar.min.js"></script>
-  <script src="js/gcal.min.js"></script>
-  <script src="js/later.min.js"></script>
-  <script src="js/schedule.min.js"></script>
-
-  <!-- Our Code -->
+  
+  <script src="js/vendor/jquery-3.3.1.min.js"></script>
+  <script src="js/vendor/bootstrap.min.js"></script>
+  <script src="js/vendor/vue.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.0.3/firebase.js"></script>
+  <script src="js/firebase.js"></script>
   <script src="js/app.js"></script>
+
+  <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/regular.js" integrity="sha384-IJ3h7bJ6KqiB70L7/+fc44fl+nKF5eOFkgM9l/zZii9xs7W2aJrwIlyHZiowN+Du" crossorigin="anonymous"></script>
+  <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
 
 </body>
 </html>

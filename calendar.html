@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Laboratoria Calendar Demo</title>
+
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel='stylesheet' href="css/fullcalendar.min.css">
+</head>
+<body>
+  <header class="container-fluid">
+    <h1>Calendar Scheduler</h1>
+  </header>
+
+  <main class="container-fluid" id="tasks">
+    <div class="row">
+      <section class="col-lg-3 col-md-4">
+        <h2>Tasks</h2>
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#editSettingsModal">Settings</button> <button class="btn btn-primary" v-on:click="refresh">Schedule</button> 
+        <hr>
+        
+        <div class="card" v-for="task in tasks">
+          <div class="card-body">
+            <button style="float:right" class="btn btn-light" data-toggle="collapse" v-bind:data-target="'#taskCollapse'+task.id"><img src="svg/chevron-bottom.svg" alt="Show"></button>
+            <h5 class="card-title">{{tasksData[task.id]}} ({{task.duration}} mins)</h5>
+            
+
+            <div class="collapse" :id="'taskCollapse'+task.id">
+              <dl>
+                <dt>MinSchedule:</dt> <dd>{{task.minSchedule}} minutes</dd>
+                <dt>Priority:</dt> <dd>{{task.priority}}</dd>
+                <dt>Depends On:</dt> <dd>{{task.dependsOn}}</dd>
+              </dl>
+              <div class="text-right">
+                <button class="btn btn-primary" href="#" v-on:click="edit(task.id)">Edit</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <hr>
+
+        <div class="modal"  id="editTaskModal" tabindex="-1" role="dialog"><!-- Modal-->
+          <div class="modal-dialog" role="document">
+            <div v-if="selectedTask" class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">{{selectedTask.name}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body" >
+                <div class="form-group">
+                  <label for="nameInput">Name:</label>
+                  <input id="nameInput" class="form-control" v-model="selectedTask.name"/>
+                </div>
+                <div class="form-group">
+                  <label for="durationInput">Duration:</label>
+                  <input id="durationInput" class="form-control" v-model="selectedTask.duration"/>
+                </div>
+                <div class="form-group">
+                  <label for="minScheduleInput">Minimal Duration:</label>
+                  <input id="minScheduleInput" class="form-control" v-model="selectedTask.minSchedule"/>
+                </div>
+                <div class="form-group">
+                  <label for="priorityInput">Priority:</label>
+                  <input id="priorityInput" class="form-control" v-model="selectedTask.priority"/>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Modal-->
+
+        <div class="modal"  id="editSettingsModal" tabindex="-1" role="dialog"><!-- Modal-->
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Settings</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body" >
+                <div class="form"><!--General Settings-->
+
+                  <button class="btn btn-primary" v-on:click="addRange">Add Range</button>
+                  <div v-for="range in ranges" v-bind:key="range.id">
+                    <div class="form-row">
+                      <div class="col">
+                        <input class="form-control" v-model="range.after"/>
+                      </div> — 
+                      <div class="col">
+                        <input class="form-control" v-model="range.before"/>
+                      </div>
+                      <button class="btn btn-primary" v-on:click="deleteRange(range.id)">-</button>
+                    </div>
+                  </div>   
+                  <div class="form-group">
+                    <label for="keyInput">API-Key:</label>
+                    <input id="keyInput" class="form-control" v-model="googleCalendarApiKey"/>
+                  </div>
+                  <div class="form-group">
+                    <label for="calendarInput">Calendar:</label>
+                    <input id="calendarInput" class="form-control" v-model="eventsGoogleCalendar"/>
+                  </div>
+                  <div class="form-group">
+                    <label for="startDateInput">Start Date:</label>
+                    <input id="startDateInput" class="form-control" v-model="startDate"/>
+                  </div>
+
+                </div><!--End General Settings-->
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Modal-->
+       </section>
+
+      <section id="calendar" class="col-lg-9 col-md-8"></section>
+    </div>
+  </main>
+
+  <!-- Bootstrap Basics -->
+  <script src="js/vendor/jquery-3.3.1.min.js"></script>
+  <!--<script src="js/popper.min.js"></script>-->
+  <script src="js/vendor/bootstrap.min.js"></script>
+
+  <!--UI Library -->
+  <script src="js/vendor/vue.js"></script>
+
+  <!-- Key Libraries -->
+  <script src="js/vendor/moment.min.js"></script>
+  <script src="js/vendor/fullcalendar.min.js"></script>
+  <script src="js/vendor/gcal.min.js"></script>
+  <script src="js/vendor/later.min.js"></script>
+  <script src="js/vendor/schedule.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.0.3/firebase.js"></script>
+
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyDjtCCIceNZtBzup2xHdXZaSBeLJxl8PyQ",
+      authDomain: "laboratoria-calendar.firebaseapp.com",
+      databaseURL: "https://laboratoria-calendar.firebaseio.com",
+      projectId: "laboratoria-calendar",
+      storageBucket: "",
+      messagingSenderId: "113338435921"
+    };
+    firebase.initializeApp(config);
+  </script>
+
+    <!-- Our Code -->
+    <script src="js/calendar.js"></script>
+    <script src="js/index.js"></script>
+
+</body>
+</html>
