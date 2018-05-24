@@ -15,16 +15,13 @@
 			/** Sessions as defined in the database, this is transformed in real time before calculus **/
 			sessions: [],
 			
-			schedule: {
-				sessions: [], //the sessions already preprocessed (we might not use this if it's used right away)
-				singleSessions: [], //the sequence of single sessions that complete a class (we might not use this if it's used right away)
-				events: [], // the events ready to be used by the calendar, again this might become in singleSessions
-				resources: [{id: "class"}], 
-				availability: [],
-			},
+			/** The sequence of single sessions that complete a class (we might not use this if it's used right away) **/
+			singleSessions: [], 
 			
-			/** Reference to the database node **/
-			scheduleRef: null, //done
+			/** Reference to the database nodes **/
+			scheduleRef: null, 
+			settingsRef: null, 
+			sessionsRef: null, 
 			
 			/**	For Session editing **/
 			selectedSession : null,
@@ -54,12 +51,13 @@
 		},
 		methods: {
 			render: function(){
-				console.log('¿Calendar loaded check on Render?', $('#calendar').children().length > 0);
 				if ( $('#calendar').children().length > 0 ) {
-					console.log('Refetching');
+					$('#calendar').fullCalendar( 'removeEvents');
+					$('#calendar').fullCalendar( 'removeEventSource', app.singleSessions);
+					$('#calendar').fullCalendar( 'addEventSource', app.singleSessions );
 					$('#calendar').fullCalendar('refetchEvents'); 
 				} else {
-					console.log('Initial load');
+					$("#calendar").fullCalendar('destroy');
 					app.lastRefresh=Date.now();
 					$("#calendar").fullCalendar({
 						header: {
@@ -68,28 +66,24 @@
 							right: "month,agendaWeek,agendaDay"
 						},
 						defaultView: "agendaWeek",
-						navLinks: false, /* can click day/week names to navigate views */
+						navLinks: true, 
 						editable: false,
 						googleCalendarApiKey: config.googleCalendarApiKey,
-						eventSources: [app.eventsGoogleCalendar, app.getSingleSessions() ],
+						eventSources: [app.eventsGoogleCalendar, app.singleSessions ],
 						theme: "bootstrap4"
 					});
+					console.log();
+					app.calendar = $("#calendar").fullCalendar('getCalendar');
 				}
 			},
-			refresh:function(reason) {
+			refresh:function() {
 				let delta = Date.now()-app.lastRefresh;
 				
-				console.log(reason, delta);
-				console.log('¿Calendar loaded Check on Refresh?', $('#calendar').children().length > 0);
-
 				if( delta >500 && $('#calendar').children().length > 0){
 					console.log('Debouncing time passed');
 					app.lastRefresh=Date.now();
-					
-					/*this.schedule();*/
+					app.schedule();
 					app.render();
-				} else {
-					console.log("Will not refresh");
 				}
 			},
 			load: function() {
@@ -130,6 +124,7 @@
 				
 				console.log("settingsUpdated");
 				app.render();
+				app.schedule();
 			},
 			saveSettings: function(){
 				app.settingsRef.update({
@@ -145,17 +140,17 @@
 				let session = snap.val();
 				session.id = snap.key;
 				app.sessions.push(session);
-				app.refresh('sessionAdded');
+				app.refresh();
 			},
 			sessionRemoved: function(snap) {
 				let index = app.sessions.findIndex( (session) => snap.key==session.id );
 				app.sessions.splice(index,1);
-				//app.refresh();
+				app.refresh();
 			},
 			sessionChanged: function(snap) {
 				let index = app.sessions.findIndex( (session) => snap.key==session.id );
 				app.sessions.splice(index,1, snap.val());
-				app.refresh('sessionChanged');
+				app.refresh();
 			},
 			changePriority(id, change){
 				let newPriority = parseInt(app.sessions.find( (session) => id==session.id ).priority) + change;
@@ -192,104 +187,78 @@
 			deleteSession: function(id) {
 				app.sessionsRef.child(id).remove();
 			},
-			loadMockup: function() {
-				/*this.tasksData= {
-					1: 'Presentation',
-					2: 'English Class',
-					3: 'Priority Class',
-					4: 'Minimal 2 Hours',
-					5: 'Doubly Dependent Task 1',
-					6: 'Another Task',
-					7: 'Yet Another Task',
-					8: 'I really dont understand this'
-				}
-				
-				this.tasks = [
-					{id: 1, duration: 4*60, resources: ['class']},
-					{id: 2, duration: 1*60, priority: 100, available: later.parse.recur().after('08:30:00').time().before('09:30:00').time() ,resources: ['class']},
-					{id: 3, duration: 2*60, dependsOn: [1], priority: 10, minSchedule: 120, resources: ['class']},
-					{id: 4, duration: 8*60, dependsOn: [1], minSchedule: 120 ,resources: ['class']},
-					{id: 5, duration: 5*60, dependsOn: [1,3] ,resources: ['class']},
-					{id: 6, duration: 3*60, dependsOn: [4], resources: ['class'] },
-					{id: 7, duration: 3*60, dependsOn: [5],  resources: ['class'] },
-					{id: 8, duration: 3*60, dependsOn: [6,7], resources: ['class'] }
-				];
-				
-				this.resources = [{id: 'class'}];
-				
-				this.ranges = [
-					{id:1, after:'8:30', before:'11:00'},
-					{id:2, after:'11:30', before:'14:00'},
-					{id:3, after:'15:00', before:'17:00'}
-				];*/
-			},
 			addRange: function() {
 				let top = 0;
-				for (i=0;i<this.ranges.length;i++) {
-					if(this.ranges[i].id>top) {
-						top=this.ranges[i].id;
+				for (i=0;i<app.ranges.length;i++) {
+					if(appranges[i].id>top) {
+						top=app.ranges[i].id;
 					}
 				}
-				this.ranges.push({id:++top, after:'15:00', before:'17:00'});
+				app.ranges.push({id:++top, after:'15:00', before:'17:00'});
 			},
 			deleteRange: function(id) {
-				let index = this.ranges.findIndex(range => range.id===id );
-				this.ranges.splice(index,1);
+				let index = app.ranges.findIndex(range => range.id===id );
+				app.ranges.splice(index,1);
 			},
 			
-			
-			createSchedule: function(){
-				/*this.startDate = new Date(this.startDate);
+			schedule: function(){
+				let startDate = new Date(app.startDate);
 				
-				this.projectAvailability =	later.parse.recur();
-				for (let i=0;i<this.ranges.length;i++) {
-					this.projectAvailability.and().onWeekday()
-					.after(this.ranges[i].after).time()
-					.before(this.ranges[i].before).time();
+				let availability = later.parse.recur();
+				for (let i=0;i<app.ranges.length;i++) {
+					availability.and().onWeekday()
+					.after(app.ranges[i].after).time()
+					.before(app.ranges[i].before).time();
 				}
 				
-				this.projectAvailability = this.projectAvailability.except();
-				let clientEvents = this.calendar.clientEvents();
+				availability = availability.except();
+				let clientEvents = app.calendar.clientEvents();
 				for (let i=0;i<clientEvents.length;i++) {
 					let event = clientEvents[i];
 					if (typeof event.source.googleCalendarId !=='undefined') {
 						let start = event.start;
 						let end = event.end;
 						
-						this.projectAvailability
+						availability
 						.and()
 						.on(start.dayOfYear()).dayOfYear()
 						.after(start.format('HH:mm')).time()
 						.before(end.format('HH:mm')).time();
 					}
 				}
+				let processedSessions = [];
+				app.sessions.map( (session) => {
+					session.resources = ['class'];
+					processedSessions.push(session);
+				});
 				
-				this.scheduledTasks = schedule.create(this.tasks, this.resources, this.projectAvailability, this.startDate).scheduledTasks;
+				let scheduledSessions = schedule.create(processedSessions, [{id: "class"}], availability, startDate).scheduledTasks;
 				
-				this.events = [];
-				for(let id in this.scheduledTasks) {
-					let task = this.scheduledTasks[id];
-					
-					for(let i=0;i<task.schedule.length;i++){
-						let start = new Date(task.schedule[i].start);
-						let end = new Date(task.schedule[i].end);
+				let events = [];
+				for(let id in scheduledSessions) {
+					let session = scheduledSessions[id];
+					for(let i=0;i<session.schedule.length;i++){
+						let start = new Date(session.schedule[i].start);
+						let end = new Date(session.schedule[i].end);
 						
-						let event = {
+						let singleSession = {
 							id: id,
-							title: this.tasksData[id],
+							title: app.sessions.find(session_search => session_search.id==id).name,
 							start: start.toISOString(),
 							end: end.toISOString(),
 						}
-						this.events.push(event);
+						events.push(singleSession);
 					}
-				}*/
-			},
-			
-			getSingleSessions: function() {
-				return [];
-				/*return app.schedule.singleSession;*/
+				}
+				app.singleSessions = {
+					events: events,
+					color: "cornflowerblue",
+					textColor: "black",
+					borderColor: "grey"
+				};
 			}
 		}
+		
 	});
 	
 	app.load();

@@ -20,7 +20,6 @@
 			},
 			create: function() {
 				let newSchedule = {
-					new: true,
 					settings: {
 						name: $("#nameInput").val(),
 						description: $("#descriptionTextarea").val(),
