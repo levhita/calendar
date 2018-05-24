@@ -15,10 +15,9 @@ header {
     position:relative;
 }
 .floater {
-    float:right;
     position: absolute;
     top:0em;
-    right:1em;
+    right:0em;
 }
 .session {
     margin-bottom: 1em;

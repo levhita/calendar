@@ -55,21 +55,24 @@
 		methods: {
 			render: function(){
 				//Replace with test of emptyness and only refresh
-				$("#calendar").fullCalendar('destroy');
-				$("#calendar").fullCalendar({
-					header: {
-						left: "prev,next today",
-						center: "title",
-						right: "month,agendaWeek,agendaDay"
-					},
-					defaultView: "agendaWeek",
-					navLinks: false, /* can click day/week names to navigate views */
-					editable: false,
-					googleCalendarApiKey: app.googleCalendarApiKey,
-					eventSources: [app.eventsGoogleCalendar, app.getSingleSessions() ]
-					
-				});
-				app.calendar = $('#calendar').fullCalendar('getCalendar'); 
+				if ( $('#calendar').children().length > 0 ) {
+					$("#calendar").fullCalendar('refetchEvents');
+				} else {
+					$("#calendar").fullCalendar({
+						header: {
+							left: "prev,next today",
+							center: "title",
+							right: "month,agendaWeek,agendaDay"
+						},
+						defaultView: "agendaWeek",
+						navLinks: false, /* can click day/week names to navigate views */
+						editable: false,
+						googleCalendarApiKey: app.googleCalendarApiKey,
+						eventSources: [app.eventsGoogleCalendar, app.getSingleSessions() ],
+						theme: "bootstrap4"
+					});
+					app.calendar = $('#calendar').fullCalendar('getCalendar'); 
+				}
 			},
 			
 			load: function() {
@@ -80,8 +83,7 @@
 				
 				app.scheduleRef.once("value", (snap) => {
 					if (snap.val()==null) app.redirectHome();
-					app.updateSettings(snap);
-					app.render();
+					app.settingsUpdated(snap);
 				}, (error) => app.redirectHome() );
 				
 				app.connectFirebaseEvents();
@@ -92,12 +94,12 @@
 				window.location = "index.html";
 			},
 			connectFirebaseEvents: function(){
-				app.scheduleRef.on("value", app.updateSettings);
+				app.scheduleRef.on("value", app.settingsUpdated);
 				app.scheduleRef.child('sessions').on("child_added",   app.sessionAdded);
 				app.scheduleRef.child('sessions').on("child_removed", app.sessionRemoved);
 				app.scheduleRef.child('sessions').on("child_changed", app.sessionChanged);
 			},
-			updateSettings: function(snap) {
+			settingsUpdated: function(snap) {
 				schedule = snap.val();
 				app.name		= schedule.name || "";
 				app.description = schedule.description || "";
@@ -106,6 +108,19 @@
 				
 				app.ranges = schedule.ranges || [];				
 				app.startDate = (schedule.startDate)? new Date(schedule.startDate): new Date();
+				
+				app.render();
+			},
+			saveSettings: function(){
+				app.scheduleRef.update({
+					name: app.name,
+					description: app.description,
+					googleCalendarApiKey: app.googleCalendarApiKey,
+					eventsGoogleCalendar: app.eventsGoogleCalendar,
+					ranges: app.ranges,
+					startDate: app.startDate
+				});
+				$("#editSettingsModal").modal('hide');
 			},
 			sessionAdded: function(snap) {
 				let session = snap.val();

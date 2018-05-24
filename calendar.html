@@ -5,7 +5,7 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Laboratoria Calendar Demo</title>
+    <title>Calendar Scheduler</title>
     
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel='stylesheet' href="css/fullcalendar.min.css">
@@ -28,7 +28,7 @@
             </div>        
         </section>
         <div class="row">
-            <section class="col-md-4">
+            <section class="col-md-5 col-lg-4 col-xl-3">
                 
                 <div id="sessions">
                     <h3>Sessions</h3>
@@ -62,7 +62,7 @@
             
             </section>
             
-            <section id="calendar" class="col-md-8"></section>
+            <section id="calendar" class="col-md-7 col-lg-8 col-xl-9"></section>
         </div>
         
         <!--************************************** -->
@@ -154,7 +154,7 @@
                         </div><!--End General Settings-->
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" v-on:click="saveSettings"><i class="fas fa-save"></i> Save</button>
                     </div>
                 </div>
             </div>
