@@ -9,10 +9,10 @@ header {
     margin-bottom:1em;
 }
 #sessions {
-    border-bottom:1px solid grey;
-    padding-bottom:1em;
-    margin-bottom:1em;
-    position:relative;
+   position:relative;
+}
+#sessions > h3 {
+    margin-bottom: 27px;
 }
 .floater {
     position: absolute;

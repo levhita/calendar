@@ -8,9 +8,8 @@
 			/**Basic Settings **/
 			name: "", 
 			description: "", 
-			googleCalendarApiKey: "",
 			eventsGoogleCalendar: "",
-			startDate: null,
+			startDate: "",
 			ranges: [],
 			
 			/** Sessions as defined in the database, this is transformed in real time before calculus **/
@@ -32,6 +31,7 @@
 			
 			/** The fullcalendar reference **/
 			calendar: null,
+			lastRefresh: 0,
 		},
 		computed: {
 			orderedSessions: function(){
@@ -54,10 +54,13 @@
 		},
 		methods: {
 			render: function(){
-				//Replace with test of emptyness and only refresh
+				console.log('¿Calendar loaded check on Render?', $('#calendar').children().length > 0);
 				if ( $('#calendar').children().length > 0 ) {
-					$("#calendar").fullCalendar('refetchEvents');
+					console.log('Refetching');
+					$('#calendar').fullCalendar('refetchEvents'); 
 				} else {
+					console.log('Initial load');
+					app.lastRefresh=Date.now();
 					$("#calendar").fullCalendar({
 						header: {
 							left: "prev,next today",
@@ -67,55 +70,71 @@
 						defaultView: "agendaWeek",
 						navLinks: false, /* can click day/week names to navigate views */
 						editable: false,
-						googleCalendarApiKey: app.googleCalendarApiKey,
+						googleCalendarApiKey: config.googleCalendarApiKey,
 						eventSources: [app.eventsGoogleCalendar, app.getSingleSessions() ],
 						theme: "bootstrap4"
 					});
-					app.calendar = $('#calendar').fullCalendar('getCalendar'); 
 				}
 			},
-			
+			refresh:function(reason) {
+				let delta = Date.now()-app.lastRefresh;
+				
+				console.log(reason, delta);
+				console.log('¿Calendar loaded Check on Refresh?', $('#calendar').children().length > 0);
+
+				if( delta >500 && $('#calendar').children().length > 0){
+					console.log('Debouncing time passed');
+					app.lastRefresh=Date.now();
+					
+					/*this.schedule();*/
+					app.render();
+				} else {
+					console.log("Will not refresh");
+				}
+			},
 			load: function() {
 				if (window.location.hash=="") app.redirectHome();
 				
 				app.key = window.location.hash.substr(1);
-				app.scheduleRef = firebase.database().ref().child("schedules/"+app.key);
+				app.scheduleRef = firebase.database().ref().child("schedules").child(app.key);
+				app.settingsRef = app.scheduleRef.child('settings');
+				app.sessionsRef = app.scheduleRef.child('sessions');
 				
 				app.scheduleRef.once("value", (snap) => {
 					if (snap.val()==null) app.redirectHome();
-					app.settingsUpdated(snap);
 				}, (error) => app.redirectHome() );
 				
 				app.connectFirebaseEvents();
-				
 			},
 			redirectHome: function(){
 				alert("Couldn't load Schedule, redirecting to home...");
 				window.location = "index.html";
 			},
 			connectFirebaseEvents: function(){
-				app.scheduleRef.on("value", app.settingsUpdated);
-				app.scheduleRef.child('sessions').on("child_added",   app.sessionAdded);
-				app.scheduleRef.child('sessions').on("child_removed", app.sessionRemoved);
-				app.scheduleRef.child('sessions').on("child_changed", app.sessionChanged);
+				app.settingsRef.on("value", app.settingsUpdated);
+				app.sessionsRef.on("child_added",   app.sessionAdded);
+				app.sessionsRef.on("child_removed", app.sessionRemoved);
+				app.sessionsRef.on("child_changed", app.sessionChanged);
 			},
 			settingsUpdated: function(snap) {
-				schedule = snap.val();
-				app.name		= schedule.name || "";
-				app.description = schedule.description || "";
-				app.googleCalendarApiKey = schedule.googleCalendarApiKey || "";
-				app.eventsGoogleCalendar = schedule.eventsGoogleCalendar || "";
+				settings = snap.val();
 				
-				app.ranges = schedule.ranges || [];				
-				app.startDate = (schedule.startDate)? new Date(schedule.startDate): new Date();
+				let properties = ['name', 'description', 'eventsGoogleCalendar', 'startDate', 'ranges'];
+				let changed = false;
+				properties.map( (property) => {
+					if ( app[property] != settings[property] ) {
+						app[property] = settings[property];
+						changed = true;
+					}
+				});
 				
+				console.log("settingsUpdated");
 				app.render();
 			},
 			saveSettings: function(){
-				app.scheduleRef.update({
+				app.settingsRef.update({
 					name: app.name,
 					description: app.description,
-					googleCalendarApiKey: app.googleCalendarApiKey,
 					eventsGoogleCalendar: app.eventsGoogleCalendar,
 					ranges: app.ranges,
 					startDate: app.startDate
@@ -126,18 +145,21 @@
 				let session = snap.val();
 				session.id = snap.key;
 				app.sessions.push(session);
+				app.refresh('sessionAdded');
 			},
 			sessionRemoved: function(snap) {
 				let index = app.sessions.findIndex( (session) => snap.key==session.id );
 				app.sessions.splice(index,1);
+				//app.refresh();
 			},
 			sessionChanged: function(snap) {
 				let index = app.sessions.findIndex( (session) => snap.key==session.id );
 				app.sessions.splice(index,1, snap.val());
+				app.refresh('sessionChanged');
 			},
 			changePriority(id, change){
 				let newPriority = parseInt(app.sessions.find( (session) => id==session.id ).priority) + change;
-				app.scheduleRef.child('sessions').child(id).update({priority: newPriority});
+				app.sessionsRef.child(id).update({priority: newPriority});
 			},
 			openAddSession: function() {
 				app.selectedSession = {
@@ -154,11 +176,11 @@
 				$("#editSessionModal").modal('hide');
 				if(app.selectedSession.new) {
 					delete app.selectedSession.new;
-					let newSessionRef = app.scheduleRef.child('sessions').push();
+					let newSessionRef = app.sessionsRef.push();
 					app.selectedSession.id = newSessionRef.key;
 					newSessionRef.set(app.selectedSession);
 				} else {
-					app.scheduleRef.child('sessions').child(app.selectedSession.id).update(app.selectedSession);
+					app.sessionsRef.child(app.selectedSession.id).update(app.selectedSession);
 				}
 				app.selectedSession=null;
 			},
@@ -168,7 +190,7 @@
 				$('#editSessionModal').modal("show");
 			},
 			deleteSession: function(id) {
-				app.scheduleRef.child('sessions').child(id).remove();
+				app.sessionsRef.child(id).remove();
 			},
 			loadMockup: function() {
 				/*this.tasksData= {
@@ -200,11 +222,6 @@
 					{id:2, after:'11:30', before:'14:00'},
 					{id:3, after:'15:00', before:'17:00'}
 				];*/
-			},
-			
-			refresh:function() {
-				/*this.schedule();
-				this.render();*/
 			},
 			addRange: function() {
 				let top = 0;

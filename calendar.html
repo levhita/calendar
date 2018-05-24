@@ -51,9 +51,6 @@
                         <div class="card-footer">
                             <div class="text-right">
                                 <button class="btn btn-light" style="float:left" href="#" v-on:click="deleteSession(session.id)"><i class="fas fa-trash"></i></button>
-                                
-                                
-                                
                                 <button class="btn btn-primary" href="#" v-on:click="editSession(session.id)"><i class="fas fa-pencil-alt"></i> Edit</button>
                             </div>
                         </div>
@@ -126,10 +123,6 @@
                                 <textarea  id="descriptionTextarea" placeholder="July 23 - July 30" class="form-control" rows="3" v-model="description"></textarea>
                             </div>
                             <div class="form-group">
-                                <label for="keyInput">API-Key:</label>
-                                <input id="keyInput" class="form-control" v-model="googleCalendarApiKey"/>
-                            </div>
-                            <div class="form-group">
                                 <label for="calendarInput">Calendar ID:</label>
                                 <input id="calendarInput" class="form-control" v-model="eventsGoogleCalendar"/>
                             </div>
@@ -172,7 +165,7 @@
 <script src="js/vendor/schedule.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/5.0.3/firebase.js"></script>
 
-<script src="js/firebase.js"></script>  
+<script src="js/settings.js"></script>  
 <script src="js/calendar.js"></script>
 
 <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" integrity="sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe" crossorigin="anonymous"></script>

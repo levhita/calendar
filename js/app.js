@@ -20,16 +20,18 @@
 			},
 			create: function() {
 				let newSchedule = {
-					name: $("#nameInput").val(),
-					description: $("#descriptionTextarea").val(),
-					googleCalendarApiKey: $("#keyInput").val(),
-					eventsGoogleCalendar: $("#calendarInput").val(),
-					startDate: new Date(),
-					ranges: [
-						{id:0, after:'9:30', before:'11:00'},
-						{id:1, after:'11:15', before:'14:00'},
-					],
-					new: true
+					new: true,
+					settings: {
+						name: $("#nameInput").val(),
+						description: $("#descriptionTextarea").val(),
+						eventsGoogleCalendar: $("#calendarInput").val(),
+						startDate: moment().format("YYYY-MM-DD"),
+						ranges: [
+							{id:0, after:'9:30', before:'11:00'},
+							{id:1, after:'11:15', before:'14:00'},
+						],
+					},
+					sessions: {}
 				}
 				
 				let newScheduleRef = app.schedulesRef.push();
