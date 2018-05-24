@@ -24,13 +24,18 @@
 					description: $("#descriptionTextarea").val(),
 					googleCalendarApiKey: $("#keyInput").val(),
 					eventsGoogleCalendar: $("#calendarInput").val(),
+					startDate: new Date(),
+					ranges: [
+						{id:0, after:'9:30', before:'11:00'},
+						{id:1, after:'11:15', before:'14:00'},
+					],
 					new: true
 				}
 				
 				let newScheduleRef = app.schedulesRef.push();
 				newScheduleRef.set(newSchedule);
 				
-				window.location = "calendar.html#"+newScheduleRef.key;
+				//window.location = "calendar.html#"+newScheduleRef.key;
 			},
 			edit:  function(key) {
 				window.location = "calendar.html#"+key;

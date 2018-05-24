@@ -1,0 +1,25 @@
+header {
+    text-align: right;
+    color:white;
+    background-color: black;
+
+}
+#schedule {
+    border-bottom:3px solid #EEE;
+    margin-bottom:1em;
+}
+#sessions {
+    border-bottom:1px solid grey;
+    padding-bottom:1em;
+    margin-bottom:1em;
+    position:relative;
+}
+.floater {
+    float:right;
+    position: absolute;
+    top:0em;
+    right:1em;
+}
+.session {
+    margin-bottom: 1em;
+}
