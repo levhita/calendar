@@ -34,8 +34,10 @@
               {{schedule.settings.description}}
 
               <dl>
-                <dt>Calendar ID:</dt>
-                <dd>{{schedule.settings.eventsGoogleCalendar}}</dd>
+                <dt>Source CalendarID:</dt>
+                <dd>{{schedule.settings.eventsSource}}</dd>
+                <dt>Target CalendarID:</dt>
+                <dd>{{schedule.settings.eventsTarget}}</dd>
               </dl>
             </p>
           </div>
@@ -69,8 +71,12 @@
                   <textarea  id="descriptionTextarea" placeholder="July 23 - July 30" class="form-control" rows="3"></textarea>
                 </div>
               <div class="form-group">
-                <label for="calendarInput">Calendar ID:</label>
-                <input id="calendarInput" placeholder="You get this one from your calendar settings" class="form-control"/>
+                <label for="calendarSourceInput">Source CalendarID:</label>
+                <input id="calendarSourceInput" placeholder="You get this one from your calendar settings" class="form-control"/>
+              </div>
+              <div class="form-group">
+                  <label for="calendarTargetInput">Target Calendar ID:</label>
+                  <input id="calendarTargetInput" placeholder="You get this one from your calendar settings" class="form-control"/>
               </div>
             </div>
           </div>

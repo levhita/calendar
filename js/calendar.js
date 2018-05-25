@@ -8,7 +8,8 @@
 			/**Basic Settings **/
 			name: "", 
 			description: "", 
-			eventsGoogleCalendar: "",
+			eventsSource: "",
+			eventsTarget: "",
 			startDate: "",
 			ranges: [],
 			
@@ -52,9 +53,9 @@
 		methods: {
 			render: function(){
 				if ( $('#calendar').children().length > 0 ) {
-					$('#calendar').fullCalendar( 'removeEvents');
-					$('#calendar').fullCalendar( 'removeEventSource', app.singleSessions);
-					$('#calendar').fullCalendar( 'addEventSource', app.singleSessions );
+					$('#calendar').fullCalendar('removeEvents');
+					$('#calendar').fullCalendar('removeEventSource', app.singleSessions);
+					$('#calendar').fullCalendar('addEventSource', app.singleSessions );
 					$('#calendar').fullCalendar('refetchEvents'); 
 				} else {
 					$("#calendar").fullCalendar('destroy');
@@ -69,7 +70,7 @@
 						navLinks: true, 
 						editable: false,
 						googleCalendarApiKey: config.googleCalendarApiKey,
-						eventSources: [app.eventsGoogleCalendar, app.singleSessions ],
+						eventSources: [app.eventsSource, app.singleSessions ],
 						theme: "bootstrap4"
 					});
 					console.log();
@@ -113,7 +114,7 @@
 			settingsUpdated: function(snap) {
 				settings = snap.val();
 				
-				let properties = ['name', 'description', 'eventsGoogleCalendar', 'startDate', 'ranges'];
+				let properties = ['name', 'description', 'eventsSource', 'eventsTarget','startDate', 'ranges'];
 				let changed = false;
 				properties.map( (property) => {
 					if ( app[property] != settings[property] ) {
@@ -130,7 +131,8 @@
 				app.settingsRef.update({
 					name: app.name,
 					description: app.description,
-					eventsGoogleCalendar: app.eventsGoogleCalendar,
+					eventsSource: app.eventsSource,
+					eventsTarget: app.eventsTarget,
 					ranges: app.ranges,
 					startDate: app.startDate
 				});
@@ -190,7 +192,7 @@
 			addRange: function() {
 				let top = 0;
 				for (i=0;i<app.ranges.length;i++) {
-					if(appranges[i].id>top) {
+					if(app.ranges[i].id>top) {
 						top=app.ranges[i].id;
 					}
 				}
@@ -256,6 +258,77 @@
 					textColor: "black",
 					borderColor: "grey"
 				};
+			},			
+			exportCalendar: function() {
+				//First we clear the Target Calendar
+				gapi.client.calendar.events.list({
+					'calendarId': app.eventsTarget,
+					'timeMin': (new Date(app.startDate)).toISOString(),
+					'showDeleted': false,
+					'singleEvents': true,
+					'maxResults': 50,
+					'orderBy': 'startTime'
+				}).then(function(response) {
+					var events = response.result.items;
+					if (events.length > 0) {
+						for (i = 0; i < events.length; i++) {
+							console.log("deleting", events[i].summary);
+							var request = gapi.client.calendar.events.delete({
+								calendarId: app.eventsTarget,
+								eventId: events[i].id
+							});
+							request.execute()
+						}
+					}
+					app.singleSessions.events.map( event => {
+						let custom_date = new Date();
+						offset = custom_date.getTimezoneOffset()/60;
+						
+						let start = new Date(event.start);
+						start.setHours(start.getHours()+offset);
+						
+						let end = new Date(event.end);
+						end.setHours(end.getHours()+offset);
+						
+						
+						let request = gapi.client.calendar.events.insert({
+							resource: {
+								"summary": event.title,
+								//	"description": event."Description of new event",
+								"start": {
+									"dateTime": app.timestamp(start),
+								},
+								"end": {
+									"dateTime": app.timestamp(end),
+								}
+							},
+							calendarId:app.eventsTarget,
+						});
+						request.execute(function(event) {
+							console.log("Created: "+event.summary);
+						});
+					})
+
+				});
+			},
+			timestamp: function (date) {
+				var pad = function (amount, width) {
+					var padding = "";
+					while (padding.length < width - 1 && amount < Math.pow(10, width - padding.length - 1))
+					padding += "0";
+					return padding + amount.toString();
+				}
+				date = date ? date : new Date();
+				var offset = date.getTimezoneOffset();
+				return pad(date.getFullYear(), 4)
+				+ "-" + pad(date.getMonth() + 1, 2)
+				+ "-" + pad(date.getDate(), 2)
+				+ "T" + pad(date.getHours(), 2)
+				+ ":" + pad(date.getMinutes(), 2)
+				+ ":" + pad(date.getSeconds(), 2)
+				+ (offset > 0 ? "-" : "+")
+				+ pad(Math.floor(Math.abs(offset) / 60), 2)
+				+ ":" + pad(Math.abs(offset) % 60, 2);
 			}
 		}
 		

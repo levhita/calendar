@@ -23,7 +23,8 @@
 					settings: {
 						name: $("#nameInput").val(),
 						description: $("#descriptionTextarea").val(),
-						eventsGoogleCalendar: $("#calendarInput").val(),
+						eventsGoogleCalendarSource: $("#calendarSourceInput").val(),
+						eventsGoogleCalendarTarget: $("#calendarTargeInput").val(),
 						startDate: moment().format("YYYY-MM-DD"),
 						ranges: [
 							{id:0, after:'9:30', before:'11:00'},
