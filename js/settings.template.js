@@ -6,5 +6,6 @@ var config = {
     storageBucket: "",
     messagingSenderId: "",
     googleCalendarApiKey: "",
+    googleCalendarClientId: "",
 };
 firebase.initializeApp(config);
