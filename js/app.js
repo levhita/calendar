@@ -23,8 +23,8 @@
 					settings: {
 						name: $("#nameInput").val(),
 						description: $("#descriptionTextarea").val(),
-						eventsGoogleCalendarSource: $("#calendarSourceInput").val(),
-						eventsGoogleCalendarTarget: $("#calendarTargeInput").val(),
+						eventsSource: $("#calendarSourceInput").val(),
+						eventsTarget: $("#calendarTargetInput").val(),
 						startDate: moment().format("YYYY-MM-DD"),
 						ranges: [
 							{id:0, after:'9:30', before:'11:00'},
@@ -33,7 +33,6 @@
 					},
 					sessions: {}
 				}
-				
 				let newScheduleRef = app.schedulesRef.push();
 				newScheduleRef.set(newSchedule);
 				
