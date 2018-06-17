@@ -31,7 +31,7 @@
     function updateSigninStatus(isSignedIn) {
         if (isSignedIn) {
             authorizeButton.style.display = 'none';
-            signoutButton.style.display = 'inline-block';
+            //signoutButton.style.display = 'inline-block';
         } else {
             authorizeButton.style.display = 'inline-block';
             signoutButton.style.display = 'none';

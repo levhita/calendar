@@ -162,6 +162,7 @@
 				app.selectedSession = {
 					id: null,
 					name:"",
+					notes:"",
 					duration: 120,
 					priority: this.lowestPriority-1,
 					minSchedule: 60,

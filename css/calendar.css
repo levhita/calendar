@@ -1,15 +1,26 @@
-header {
-    text-align: right;
-    color:white;
-    background-color: black;
-
+/*header {
+    /*color:black;
+    background-color:#FFE521;
+    padding:2em;
+    margin-bottom: 1em;
+}
+header a {
+    color:black;
+    
+}
+header a:hover {
+    text-decoration: none;
+    color:#333;
+}*/
+body, #app{
+    height:100vh;
 }
 #schedule {
     border-bottom:3px solid #EEE;
     margin-bottom:1em;
 }
 #sessions {
-   position:relative;
+    position:relative;
 }
 #sessions > h3 {
     margin-bottom: 27px;
@@ -20,8 +31,34 @@ header {
     right:0em;
 }
 .session {
-    margin-bottom: 1em;
+    
 }
 .range {
     margin-top: 0.5em;
+}
+
+.btn-primary {
+    background-color: #FFE521;
+    border-color: #FFE521;
+    color: black;
+}
+.btn-primary.disabled {
+    background-color: rgb(248, 231, 102);
+    border-color: rgb(248, 231, 102);
+    color:#111;
+}
+.btn-primary:hover, .btn-primary:not(:disabled):not(.disabled).active {
+    background-color: rgb(216, 191, 2);
+    border-color: rgb(216, 191, 2);
+    color: black;
+}
+.table-body-scroll tbody {
+    display:block;
+    max-height:70vh;
+    overflow-y:scroll;
+}
+.table-body-scroll thead, tbody tr {
+    display:table;
+    width:100%;
+    /*table-layout:fixed;*/
 }

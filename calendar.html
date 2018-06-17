@@ -12,58 +12,93 @@
     <link rel='stylesheet' href="css/calendar.css">
 </head>
 <body>
-    <header class="container-fluid">
-        <h1>Calendar Scheduler <small style="font-size: 0.5em">by <strong>levhita</strong></small></h1>
-    </header>
     
-    <main class="container-fluid" id="app">
-        <section class="row" id="schedule">
-            <div class="col">
-                <div style="float:right">
-                    <button type="button" class="btn btn-primary" id="authorize-button" style="display: none;">Authorize</button>
-                    <button type="button" class="btn btn-primary" id="signout-button" style="display: none;">Sign Out</button>
-                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#editSettingsModal"><i class="fas fa-cog"></i></button>
-                    <button type="button" class="btn btn-primary" v-on:click="refresh"><i class="fas fa-sync-alt"></i> Refresh</button> 
-                    <button type="button" class="btn btn-primary" v-on:click="exportCalendar"><i class="far fa-calendar-alt"></i> Export</button>
-                </div>
-                <h2>{{name}}</h2>
-                <p>{{description}}</p>
-            </div>        
-        </section>
-        <div class="row">
-            <section class="col-md-5 col-lg-4 col-xl-3">
+    <div id="app">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="index.html"><i class="fas fa-home"></i></a>
+            <div>
+                <button type="button" class="btn btn-primary" id="authorize-button" style="display: none;">Authorize</button>
+                <button type="button" class="btn btn-primary" id="signout-button" style="display: none;">Sign Out</button>
                 
-                <div id="sessions">
-                    <h3>Sessions</h3>
-                    <button class="btn btn-primary floater" v-on:click="openAddSession"><i class="fas fa-plus"></i> Add</button> 
-                    
-                    <div class="card session" v-for="session in orderedSessions">
-                        <h5 class="card-header">{{session.name}} <small>({{session.duration}} mins)</small></h5>
-                        <div class="card-body">
-                            <dl>
-                                <dt>Minimum Scheduling:</dt> <dd>{{session.minSchedule}} minutes</dd>
-                                <dt>Priority:</dt> <dd>{{session.priority}}
-                                    <div class="btn-group" role="group" aria-label="Order">
-                                        <button class="btn btn-sm btn-light" href="#" v-on:click="changePriority(session.id,-1)"><i class="fas fa-chevron-down"></i></button>
-                                        <button class="btn btn-sm btn-light" href="#" v-on:click="changePriority(session.id,1)"><i class="fas fa-chevron-up"></i></button>
-                                    </div>
-                                </dd>
-                            </dl>                        
-                        </div>
-                        
-                        <div class="card-footer">
-                            <div class="text-right">
-                                <button class="btn btn-light" style="float:left" href="#" v-on:click="deleteSession(session.id)"><i class="fas fa-trash"></i></button>
-                                <button class="btn btn-primary" href="#" v-on:click="editSession(session.id)"><i class="fas fa-pencil-alt"></i> Edit</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </section>
+            </div>
             
-            <section id="calendar" class="col-md-7 col-lg-8 col-xl-9"></section>
-        </div>
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+                <div class="navbar-nav mr-auto mt-2 mt-lg-0">
+                    <h2 style="color:white">{{name}}</h2>
+                </div>
+                <ul class="navbar-nav my-2 my-lg-0">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#" id="authorize-button" style="display: none;">Authorize</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="modal" data-target="#editSettingsModal" href="#"><i class="fas fa-cog"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" v-on:click="refresh"><i class="fas fa-sync-alt"></i> Refresh</a> 
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" v-on:click="exportCalendar"><i class="far fa-calendar-alt"></i> Export</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        
+        <main class="container-fluid">
+            
+            <section class="row" id="schedule">
+                <div class="col">
+                    <p>{{description}}</p>
+                </div>        
+            </section>
+            <div class="row">
+                <section class="col-md-6 col-lg-5 col-xl-4">
+                    
+                    <div id="sessions">
+                        <h3>Sessions</h3>
+                        <button class="btn btn-primary floater" v-on:click="openAddSession"><i class="fas fa-plus"></i> Add</button> 
+                        
+                        <table class="table-body-scroll table table-sm ">
+                            <thead class="">
+                                <tr>
+                                    <th scope="col">Priority</th>
+                                    <th scope="col">Name and Notes</th>
+                                    <th style="text-align: right" scope="col">Mins</th>
+                                    <th style="text-align: right" scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="session" v-for="session in orderedSessions">
+                                    <td>{{session.priority}}<br/>
+                                        <div class="btn-group" role="group" aria-label="Order">
+                                            <button class="btn btn-sm btn-light" href="#" v-on:click="changePriority(session.id,-1)"><i class="fas fa-chevron-down"></i></button>
+                                            <button class="btn btn-sm btn-light" href="#" v-on:click="changePriority(session.id,1)"><i class="fas fa-chevron-up"></i></button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>{{session.name}}</strong>
+                                        <br/>
+                                        {{session.notes}}
+                                    </td>
+                                    <td style="text-align: right">{{session.duration}}</td>
+                                    <td style="text-align: right">
+                                        <div class="btn-group" role="group" aria-label="Actions">
+                                            <button class="btn btn-light btn-sm" href="#" v-on:click="deleteSession(session.id)"><i class="fas fa-trash"></i></button>
+                                            <button class="btn btn-primary  btn-sm" href="#" v-on:click="editSession(session.id)"><i class="fas fa-pencil-alt"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                    </div>
+                    
+                </section>
+                
+                <section id="calendar" class="col-md-6 col-lg-7 col-xl-8"></section>
+                
+            </div>
+            
+        </main>  
         
         <!--************************************** -->
         <!--Modals for editing Session and Setting -->
@@ -81,6 +116,10 @@
                         <div class="form-group">
                             <label for="nameInput">Name:</label>
                             <input id="nameInput" class="form-control" v-model="selectedSession.name"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="notesTextArea">Notes:</label>
+                            <textarea id="notesTextArea" class="form-control" v-model="selectedSession.notes"></textarea>
                         </div>
                         <div class="form-group">
                             <label for="durationInput">Duration:</label>
@@ -162,25 +201,24 @@
             </div>
         </div><!-- End Modal-->
     </div>
-</main>
-
-<script src="js/vendor/jquery-3.3.1.min.js"></script>
-<script src="js/vendor/bootstrap.min.js"></script>
-<script src="js/vendor/vue.js"></script>
-<script src="js/vendor/moment.min.js"></script>
-<script src="js/vendor/fullcalendar.min.js"></script>
-<script src="js/vendor/gcal.min.js"></script>
-<script src="js/vendor/later.min.js"></script>
-<script src="js/vendor/schedule.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/5.0.3/firebase.js"></script>
-
-<script src="js/settings.js"></script>  
-<script src="js/calendar.js"></script>
-
-<script src="https://apis.google.com/js/api.js"></script>
-<script src="js/authorize.js"></script> 
-
-<script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" integrity="sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe" crossorigin="anonymous"></script>
-
+    
+    <script src="js/vendor/jquery-3.3.1.min.js"></script>
+    <script src="js/vendor/bootstrap.min.js"></script>
+    <script src="js/vendor/vue.js"></script>
+    <script src="js/vendor/moment.min.js"></script>
+    <script src="js/vendor/fullcalendar.min.js"></script>
+    <script src="js/vendor/gcal.min.js"></script>
+    <script src="js/vendor/later.min.js"></script>
+    <script src="js/vendor/schedule.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.0.3/firebase.js"></script>
+    
+    <script src="js/settings.js"></script>  
+    <script src="js/calendar.js"></script>
+    
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="js/authorize.js"></script> 
+    
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" integrity="sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe" crossorigin="anonymous"></script>
+    
 </body>
 </html>
