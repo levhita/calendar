@@ -170,6 +170,7 @@
 					new: true
 				}
 				$("#editSessionModal").modal('show');
+				setTimeout(function(){document.getElementById('nameInput').focus()},10);
 			},
 			saveSession: function() {
 				$("#editSessionModal").modal('hide');
@@ -189,7 +190,9 @@
 				$('#editSessionModal').modal("show");
 			},
 			deleteSession: function(id) {
-				app.sessionsRef.child(id).remove();
+				if(confirm('Are you sure to delete this session?')) {
+					app.sessionsRef.child(id).remove();
+				}
 			},
 			addRange: function() {
 				let top = 0;
@@ -339,3 +342,36 @@
 	app.load();
 	window.app=app;
 })();
+
+
+// defining flags
+var isCtrl = false;
+var isShift = false;
+
+$(document).ready(function() {
+	console.log("Ready. Press Ctrl+Shift+F9!");
+	
+	// action on key up
+	$(document).keyup(function(e) {
+		if(e.which == 17) {
+			isCtrl = false;
+		}
+		if(e.which == 16) {
+			isShift = false;
+		}
+	});
+	// action on key down
+	$(document).keydown(function(e) {
+		if(e.which == 17) {
+			isCtrl = true; 
+		}
+		if(e.which == 16) {
+			isShift = true; 
+		}
+		if(e.which == 65 && !isCtrl && isShift) { 
+			//Shift+a to add
+			app.openAddSession();
+		} 
+	});
+	
+});
