@@ -69,6 +69,7 @@
 						defaultView: "agendaWeek",
 						navLinks: true, 
 						editable: false,
+						height: 'parent',
 						googleCalendarApiKey: config.googleCalendarApiKey,
 						eventSources: [app.eventsSource, app.singleSessions ],
 						theme: "bootstrap4"

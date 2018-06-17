@@ -12,9 +12,9 @@ header a:hover {
     text-decoration: none;
     color:#333;
 }*/
-body, #app{
+/*body, #app{
     height:100vh;
-}
+}*/
 #schedule {
     border-bottom:3px solid #EEE;
     margin-bottom:1em;
@@ -29,9 +29,6 @@ body, #app{
     position: absolute;
     top:0em;
     right:0em;
-}
-.session {
-    
 }
 .range {
     margin-top: 0.5em;
@@ -60,5 +57,7 @@ body, #app{
 .table-body-scroll thead, tbody tr {
     display:table;
     width:100%;
-    /*table-layout:fixed;*/
+}
+.second-row {
+    height:80vh;
 }
