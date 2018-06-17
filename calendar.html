@@ -16,22 +16,21 @@
     <div id="app">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <a class="navbar-brand" href="index.html"><i class="fas fa-home"></i></a>
-            <div>
-                <button type="button" class="btn btn-primary" id="authorize-button" style="display: none;">Authorize</button>
-                <button type="button" class="btn btn-primary" id="signout-button" style="display: none;">Sign Out</button>
-                
-            </div>
-            
+            <h2 style="color:white">{{name}}</h2>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
             <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
                 <div class="navbar-nav mr-auto mt-2 mt-lg-0">
-                    <h2 style="color:white">{{name}}</h2>
+                    <div style="margin-left:1em;color:white">{{description}}</div>
                 </div>
+
                 <ul class="navbar-nav my-2 my-lg-0">
                     <li class="nav-item active">
-                        <a class="nav-link" href="#" id="authorize-button" style="display: none;">Authorize</a>
+                        <a class="nav-link" href="#" id="authorize-button" style="display: none;"><i class="fas fa-sign-in-alt"></i> Authorize</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="modal" data-target="#editSettingsModal" href="#"><i class="fas fa-cog"></i></a>
+                        <a class="nav-link" data-toggle="modal" data-target="#editSettingsModal" href="#"><i class="fas fa-cog"></i> Settings</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" v-on:click="refresh"><i class="fas fa-sync-alt"></i> Refresh</a> 
@@ -42,14 +41,9 @@
                 </ul>
             </div>
         </nav>
-        
+        <br/>
         <main class="container-fluid">
             
-            <section class="row" id="schedule">
-                <div class="col">
-                    <p>{{description}}</p>
-                </div>        
-            </section>
             <div class="row second-row">
                 <section class="col-md-6 col-lg-5 col-xl-4">
                     
