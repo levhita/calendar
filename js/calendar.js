@@ -265,6 +265,9 @@
 				};
 			},			
 			exportCalendar: function() {
+				
+				$("#exportModal").modal("show");
+				document.getElementById('exportOutput').textContent="";
 				//First we clear the Target Calendar
 				gapi.client.calendar.events.list({
 					'calendarId': app.eventsTarget,
@@ -277,7 +280,7 @@
 					var events = response.result.items;
 					if (events.length > 0) {
 						for (i = 0; i < events.length; i++) {
-							console.log("deleting", events[i].summary);
+							document.getElementById('exportOutput').textContent = "Deleting: " + events[i].summary;
 							var request = gapi.client.calendar.events.delete({
 								calendarId: app.eventsTarget,
 								eventId: events[i].id
@@ -285,7 +288,10 @@
 							request.execute()
 						}
 					}
-					app.singleSessions.events.map( event => {
+					
+					var total = app.singleSessions.events.length;
+					var count = 0;
+					app.singleSessions.events.forEach( event => {
 						let custom_date = new Date();
 						offset = custom_date.getTimezoneOffset()/60;
 						
@@ -299,7 +305,7 @@
 						let request = gapi.client.calendar.events.insert({
 							resource: {
 								"summary": event.title,
-								//	"description": event."Description of new event",
+								//"description": event."Description of new event",
 								"start": {
 									"dateTime": app.timestamp(start),
 								},
@@ -310,10 +316,20 @@
 							calendarId:app.eventsTarget,
 						});
 						request.execute(function(event) {
-							console.log("Created: "+event.summary);
+						    count++;
+							document.getElementById('exportOutput').textContent = "Created: " + event.summary;
+							document.getElementById('progressBar').style = "width:"+Math.ceil(count/total*100)+"%";
+							
+							if ( count == total ) {
+								$("#exportModal").modal("hide");
+								document.getElementById('progressBar').style = "width:0%";
+							}
+						
 						});
-					})
-
+					});
+					
+					
+					
 				});
 			},
 			timestamp: function (date) {
