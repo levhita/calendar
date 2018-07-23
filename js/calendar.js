@@ -365,7 +365,6 @@ var isCtrl = false;
 var isShift = false;
 
 $(document).ready(function() {
-	console.log("Ready. Press Ctrl+Shift+F9!");
 	
 	// action on key up
 	$(document).keyup(function(e) {
@@ -384,8 +383,8 @@ $(document).ready(function() {
 		if(e.which == 16) {
 			isShift = true; 
 		}
-		if(e.which == 65 && !isCtrl && isShift) { 
-			//Shift+a to add
+		if(e.which == 65 && isCtrl && isShift) { 
+			//Shift+Ctrl+a to add
 			app.openAddSession();
 		} 
 	});
