@@ -74,7 +74,6 @@
 						eventSources: [app.eventsSource, app.singleSessions ],
 						theme: "bootstrap4"
 					});
-					console.log();
 					app.calendar = $("#calendar").fullCalendar('getCalendar');
 				}
 			},
@@ -188,6 +187,35 @@
 				let index = this.sessions.findIndex(session => session.id===id );
 				this.selectedSession = Object.assign({}, this.sessions[index]); 
 				$('#editSessionModal').modal("show");
+			},
+			inputMath: function(event) {
+				if (event.keyCode == 13) {
+					var new_value = "";
+					try {
+						new_value = this.mathEval(event.target.value);
+					} catch (e) {
+						new_value = event.target.value;
+					}
+					app.selectedSession.duration = new_value;
+				}
+			},
+			mathEval: function(expresion){
+				// As we are running unsafe code from the user, we should allow only a limited set of
+				// characters, try this regex in: https://regex101.com/
+				
+				var regex = /^[0-9\.\+\-\(\)\/\* \t]*$/gm;
+				if (regex.exec(expresion) == null) {
+					throw new SyntaxError('Invalid Characters');
+				}
+				try {
+					// Instead of eval, we use the alternative given by MDN:
+					// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#Do_not_ever_use_eval!
+					return Function('"use strict";return (' + expresion + ')')();
+				} catch (e) {
+					// We might still have wrong syntax even with the limited set of character ((((4..4+45) 
+					throw new SyntaxError('Wrong Syntax');
+					
+				}
 			},
 			deleteSession: function(id) {
 				if(confirm('Are you sure to delete this session?')) {
@@ -316,7 +344,7 @@
 							calendarId:app.eventsTarget,
 						});
 						request.execute(function(event) {
-						    count++;
+							count++;
 							document.getElementById('exportOutput').textContent = "Created: " + event.summary;
 							document.getElementById('progressBar').style = "width:"+Math.ceil(count/total*100)+"%";
 							
@@ -324,7 +352,7 @@
 								$("#exportModal").modal("hide");
 								document.getElementById('progressBar').style = "width:0%";
 							}
-						
+							
 						});
 					});
 					

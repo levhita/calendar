@@ -114,7 +114,7 @@
 
                         <div class="form-group">
                             <label for="durationInput">Duration:</label>
-                            <input id="durationInput" class="form-control" v-model="selectedSession.duration"/>
+                            <input id="durationInput" class="form-control" v-model="selectedSession.duration" v-on:keyup="inputMath"/>
                         </div>
                         
                         <div class="form-group">
